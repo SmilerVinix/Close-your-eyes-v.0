@@ -1,0 +1,78 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local backpack = player:FindFirstChild("Backpack")
+
+-- Create the Tool
+local tool = Instance.new("Tool")
+tool.Name = "close eyes V1"
+tool.RequiresHandle = false -- No need for a handle
+tool.Parent = backpack -- Put tool in inventory
+
+-- Create the Black Screen GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BlackoutGui"
+screenGui.ResetOnSpawn = false
+
+local blackFrame = Instance.new("Frame")
+blackFrame.Size = UDim2.new(1, 0, 1, 0) -- Full screen
+blackFrame.Position = UDim2.new(0, 0, 0, 0)
+blackFrame.BackgroundColor3 = Color3.new(0, 0, 0) -- Black color
+blackFrame.Visible = false
+blackFrame.Parent = screenGui
+
+local eyeText = Instance.new("TextLabel")
+eyeText.Size = UDim2.new(0, 200, 0, 50)
+eyeText.Position = UDim2.new(0.5, -100, 0.5, -25)
+eyeText.Text = "👁️" -- Eye emoji
+eyeText.TextSize = 36
+eyeText.TextColor3 = Color3.new(1, 1, 1) -- White color
+eyeText.BackgroundTransparency = 1
+eyeText.Visible = false
+eyeText.Parent = screenGui
+
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Functions to show/hide the black screen with fade-in
+local function fadeInBlackScreen()
+    blackFrame.Visible = true
+    eyeText.Visible = true
+    blackFrame.BackgroundTransparency = 1 -- Start as transparent
+    eyeText.TextTransparency = 1 -- Start as transparent
+
+    -- Tween the transparency to 0 (fully opaque) for both black frame and eye text
+    local tweenService = game:GetService("TweenService")
+    local blackTween = tweenService:Create(blackFrame, TweenInfo.new(1), {BackgroundTransparency = 0})
+    local textTween = tweenService:Create(eyeText, TweenInfo.new(1), {TextTransparency = 0})
+    
+    blackTween:Play()
+    textTween:Play()
+end
+
+local function fadeOutBlackScreen()
+    -- Tween the transparency back to 1 (fully transparent) for both black frame and eye text
+    local tweenService = game:GetService("TweenService")
+    local blackTween = tweenService:Create(blackFrame, TweenInfo.new(1), {BackgroundTransparency = 1})
+    local textTween = tweenService:Create(eyeText, TweenInfo.new(1), {TextTransparency = 1})
+
+    blackTween:Play()
+    textTween:Play()
+
+    -- Once the fade-out is done, hide the frame and text
+    blackTween.Completed:Connect(function()
+        blackFrame.Visible = false
+        eyeText.Visible = false
+    end)
+end
+
+-- Functions to handle equipped and unequipped
+local function onEquipped()
+    fadeInBlackScreen()
+end
+
+local function onUnequipped()
+    fadeOutBlackScreen()
+end
+
+-- Connect events
+tool.Equipped:Connect(onEquipped)
+tool.Unequipped:Connect(onUnequipped)
